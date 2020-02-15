@@ -100,10 +100,10 @@ export default (app) => {
       case BOSS_TYPES.Flying:
         // if type is flying, a low speed decreases the damage
         totalAttackDamage *= elementMultiplier;
-        totalAttackDamage *= ((SPEED_CAP - kittySpeed) / SPEED_CAP);
+        totalAttackDamage *=  (kittySpeed / SPEED_CAP);
       break;
     }
-    
+
     return totalAttackDamage;
   }
 
