@@ -58,14 +58,14 @@ export default (app) => {
   {
     const elementTable =
     [
-      [3, 3, 3, 3, 3],
-      [3, 3, 3, 3, 3],
-      [3, 3, 3, 3, 3],
-      [3, 3, 3, 3, 3],
-      [3, 3, 3, 3, 3]
+      [1,   2,    1,    1,    0.5], // 0 - kitty
+      [0.5, 1,    2,    1,    1],
+      [3,   0.5,  1,    2,    1],
+      [1,   1,    0.5,  1,    2],
+      [2,   1,    1,    0.5,  1]
     ]
 
-    return elementTable[bossElement][kittyElement];
+    return elementTable[kittyElement][bossElement];
   }
 
   function getBossInfo(bossId)
