@@ -10,6 +10,7 @@ export default (app) => {
 
     return (
       {
+        tokenId: tokenId,
         attack: Number(tokenId) % 102,
         element: Number(tokenId) % 5,
         speed: Number(tokenId) % 42,
@@ -18,15 +19,51 @@ export default (app) => {
     )
   }
 
+  function getKittyDamage(kittyInfo)
+  {
+    return {
+      ...kittyInfo,
+      damage: Number(kittyInfo.tokenId)
+    }
+  }
 
-  app.get('/kitty/:id', (req, res) => {
+  function getBossInfo(bossId)
+  {
+
+    // get boss stats
+    var bossStats = {
+      element: 4,
+      type: 5,
+      skinThickness: 100
+    }
+
+    // get tokenIds of all kitties killed by boss
+    var killList = [20, 30, 5, 60, 80];
+
+    // get detailed data for each kitty
+    var kittyInfo = killList.map(getKittyStats);
+
+    // compute damage by each Kitty
+    var ripKitties = kittyInfo.map(getKittyDamage);
+
+    return (
+      {
+        ...bossStats,
+        ripKitties: ripKitties
+      }
+    )
+
+  }
+
+
+  app.all('/kitty/:id', (req, res) => {
     const {id} = req.params;
     return res.status(200).send(getKittyStats(id));
   });
 
-  app.post('/kitty/:id', (req, res) => {
+  app.all('/boss/:id', (req, res) => {
     const {id} = req.params;
-    return res.status(200).send(getKittyStats(id));
+    return res.status(200).send(getBossInfo(id));
   });
 
 
