@@ -1,21 +1,46 @@
 export default (app) => {
 
-  // attack: Number(this.kitty.tokenId) % 102, -> should return a higher number
-  // element: Number(this.kitty.tokenId) % 5, -> should return 0 - 4
-  // speed: Number(this.kitty.tokenId) % 42, -> should return a middle number
-  // crit: Number(this.kitty.tokenId) % 12 -> should return a low number
-  const SPEED_CAP = 42;
+  // Element Types
+  // 0  Earth
+  // 1  Water
+  // 2  Fire
+  // 3  Wind
+  // 4  Void (Aether)
 
-  function getKittyStats(tokenId)
+  // Boss Types
+  // 0 Normal
+  // 1 Tank
+  // 2 Flying
+
+  const ATTACK_CAP = 128;
+  const SPEED_CAP = 64;
+  const CRIT_CAP = 16;
+  const CRIT_MULTIPLIER = 3;
+  const TANK_CRIT_WEAKNESS = 2;
+
+  const ELEMENT_TYPES = {
+      Earth: 0,
+      Water: 1,
+      Fire: 2,
+      Wind: 3,
+      Void: 4
+  }
+
+  const BOSS_TYPES = {
+    Normal: 0,
+    Tank: 1,
+    Flying: 2
+  }
+
+  function getKittyStats(kittyGene)
   {
 
     return (
       {
-        tokenId: tokenId,
-        attack: Number(tokenId) % 102,
-        element: Number(tokenId) % 5,
-        speed: Number(tokenId) % SPEED_CAP,
-        crit: Number(tokenId) % 12
+        attack: Number(kittyGene) % ATTACK_CAP,
+        speed: Number(kittyGene) % SPEED_CAP,
+        crit: Number(kittyGene) % CRIT_CAP,
+        element: Number(kittyGene) % Object.keys(ELEMENT_TYPES).length
       }
     )
   }
@@ -29,9 +54,8 @@ export default (app) => {
   {
     var bossStats =
     {
-      element: 4,
-      type: 5,
-      skinThickness: 100
+      element: ELEMENT_TYPES.Water,
+      type: BOSS_TYPES.Tank
     };
 
     return bossStats;
@@ -40,17 +64,46 @@ export default (app) => {
   function computeDamage(kitty, bossStats)
   {
 
-    // get elements
+    // get primitives
     var bossElement = bossStats.element;
+    var bossType = bossStats.type;
+
     var kittyElement = kitty.element;
     var kittyBaseDamage = kitty.attack;
+    var kittySpeed = kitty.speed;
+    var kittyCritChance = kitty.crit;
 
     // get element damage mulitplier
     var elementMultiplier = computeElementMultiplier(bossElement, kittyElement);
 
-    // get total attack damage
-    var totalAttackDamage = kittyBaseDamage * elementMultiplier * (SPEED_CAP  - kitty.speed);
+    // roll for crit: random int from 0 to CRIT_CAP. if < kittyCrit, hasCrit = true
+    var hasCrit = Math.floor(Math.random() * Math.floor(CRIT_CAP)) < kittyCritChance;
 
+    // get total attack damage depending on boss type
+    var totalAttackDamage = kittyBaseDamage;
+
+    // if crit, deal more damage
+    if (hasCrit)
+      totalAttackDamage *= CRIT_MULTIPLIER;
+
+    switch (bossType)
+    {
+      case BOSS_TYPES.Normal:
+        totalAttackDamage *= elementMultiplier;
+      break;
+      case BOSS_TYPES.Tank:
+        // if tank and has crit, deal more damage
+        totalAttackDamage *= elementMultiplier;
+        if (hasCrit)
+          totalAttackDamage *= TANK_CRIT_WEAKNESS;
+      break;
+      case BOSS_TYPES.Flying:
+        // if type is flying, a low speed decreases the damage
+        totalAttackDamage *= elementMultiplier;
+        totalAttackDamage *= ((SPEED_CAP - kittySpeed) / SPEED_CAP);
+      break;
+    }
+    
     return totalAttackDamage;
   }
 
@@ -58,7 +111,7 @@ export default (app) => {
   {
     const elementTable =
     [
-      [1,   2,    1,    1,    0.5], // 0 - kitty
+      [1,   2,    1,    1,  0.5], // 0 - kitty
       [0.5, 1,    2,    1,    1],
       [3,   0.5,  1,    2,    1],
       [1,   1,    0.5,  1,    2],
@@ -78,8 +131,6 @@ export default (app) => {
 
     // get detailed data for each kitty
     var kittyInfo = killList.map(getKittyStats);
-
-    console.log(bossStats);
 
     // compute damage by each Kitty then add onto KittyInfo as ripKitties
     var ripKitties = kittyInfo.map(kitty =>
