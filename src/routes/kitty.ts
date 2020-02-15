@@ -27,6 +27,11 @@ export default (app) => {
     }
   }
 
+  function getKittiesKilled(bossId)
+  {
+    return [20, 30, 5, 60, 80];
+  }
+
   function getBossInfo(bossId)
   {
 
@@ -38,7 +43,7 @@ export default (app) => {
     }
 
     // get tokenIds of all kitties killed by boss
-    var killList = [20, 30, 5, 60, 80];
+    var killList = getKittiesKilled(bossId);
 
     // get detailed data for each kitty
     var kittyInfo = killList.map(getKittyStats);
