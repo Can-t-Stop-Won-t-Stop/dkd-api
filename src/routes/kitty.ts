@@ -54,6 +54,7 @@ export default (app) => {
   {
     var bossStats =
     {
+      bossId: Number(bossId),
       element: ELEMENT_TYPES.Water,
       type: BOSS_TYPES.Tank
     };
